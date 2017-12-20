@@ -86,13 +86,13 @@ class ImageSet(object):
 
     def get_iter_for_learning_curve(self, times):
         image_data_list = []
-        for num in np.linspace(0, len(self.x_train), times, dtype=int):
+        for num in np.linspace(0, len(self.x_train), times+1, dtype=int):
             if num == 0:
                 continue
             
             idxs = random.sample(range(len(self.x_train)), num)
-            x_train = [self.x_train[i] for i in idxs]
-            y_train = [self.y_train[i] for i in idxs]
+            x_train = np.array([self.x_train[i] for i in idxs])
+            y_train = np.array([self.y_train[i] for i in idxs])
             yield(x_train, y_train, self.x_test, self.y_test)
 
     def __str__(self):

@@ -15,15 +15,14 @@ def main():
     model = resnet.ResnetBuilder.build_resnet_18(
         (image_set.color, image_set.height, image_set.width), image_set.num_classes)
     model.summary()
-    bot = LearningBot(image_set, model)
+    bot = LearningBot(model)
 
     history = {}
-    for image_data in image_set.get_iter_for_learning_curve(3):
-        #history.append(bot.learn(*image_data, epochs=10))
+    for image_data in image_set.get_iter_for_learning_curve(5):
         size = len(image_data[0])
-        history[size] = bot.learn(*image_data, epochs=3, max_batch_size=1)
+        history[size] = bot.learn(*image_data, epochs=30, batch_size=128)
 
-    bot.draw_history_list(history, ["acc", "val_acc"], method=DrawMethod.best)
+    bot.draw_history_list('test.png', history, ["acc", "val_acc"], method=DrawMethod.best)
 
 if __name__ == "__main__":
     main()
