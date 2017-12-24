@@ -81,7 +81,7 @@ class ImageSet(object):
         return tmp_inst
 
     def split(self, train_rate=0.9, seed=None):
-        if train_rate < 0 or train_rate > 1:
+        if train_rate <= 0 or train_rate > 1:
             raise ValueError("invalid train_rate {}".format(train_rate))
             
         # init rand mod.

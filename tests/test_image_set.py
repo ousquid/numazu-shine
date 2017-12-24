@@ -25,6 +25,7 @@ class TestImageSet(unittest.TestCase):
         ng_ydata = np.zeros((10))
         with self.assertRaises(ValueError):
             ImageSet(ng_xdata, ok_ydata, num_classes, grayscale)
+        with self.assertRaises(ValueError):
             ImageSet(ok_xdata, ng_ydata, num_classes, grayscale)
         
     
@@ -69,6 +70,7 @@ class TestImageSet(unittest.TestCase):
         s.split(train_rate=1)
         with self.assertRaises(ValueError):
             s.split(train_rate=0)
+        with self.assertRaises(ValueError):
             s.split(train_rate=1.0001)
         
             
