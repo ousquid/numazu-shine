@@ -12,14 +12,37 @@ import math
 
 CacheMode = Enum("CacheMode", "use rewrite ignore")
 
+class NumazuShineException(Exception):
+    def __init__(self, str):
+        self.str = str
+    
+    def __str__(self):
+        return "NumazuShineException {}".format(self.str)
+
 class ImageSet(object):
-    def __init__(self, x_data, y_data, num_classes, grayscale, width, height):
+    def __init__(self, x_data, y_data, num_classes, grayscale):
         self.x_data = x_data
+        if len(x_data.shape) != 4:
+            raise NumazuShineException("shape of x_data ({}) is invalid".format(x_data.shape))
+
         self.y_data = y_data
+        if len(y_data.shape) != 2:
+            raise NumazuShineException("shape of y_data ({}) is invalid".format(y_data.shape))
+
+        if x_data.shape[0] != y_data.shape[0]:
+            fmt = "unmatched x_data.shape[0] ({}) and y_data.shape[0] ({})"
+            msg = fmt.format(x_data.shape[0], y_data.shape[0])
+            raise NumazuShineException(msg)
         self.num_classes = num_classes
         self.color = 1 if grayscale else 3
-        self.width = width
-        self.height = height
+
+    @property
+    def width(self):
+        return self.x_data.shape[1]
+
+    @property
+    def height(self):
+        return self.x_data.shape[2]
 
     @staticmethod
     def load(path, width, height, *, grayscale=True, cache=CacheMode.use):
@@ -38,7 +61,7 @@ class ImageSet(object):
         if cache==CacheMode.use and os.path.exists(pklfile):
             with open(pklfile, "rb") as f:
                 (tmp_x, tmp_y) = pickle.load(f);
-            return ImageSet(tmp_x, tmp_y, num_classes, grayscale, width, height)
+            return ImageSet(tmp_x, tmp_y, num_classes, grayscale)
 
         # load images
         tmp_x, tmp_y = [], []
@@ -56,7 +79,7 @@ class ImageSet(object):
         tmp_x.astype('float32')
         tmp_x /= 255
         tmp_y = keras.utils.to_categorical(tmp_y, num_classes)
-        tmp_inst = ImageSet(tmp_x, tmp_y, num_classes, grayscale, width, height)
+        tmp_inst = ImageSet(tmp_x, tmp_y, num_classes, grayscale)
 
         # save cache
         if cache != CacheMode.ignore:
