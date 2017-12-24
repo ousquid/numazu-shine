@@ -104,6 +104,10 @@ class ImageSet(object):
         self.y_test = np.array([self.y_data[i] for i in test_idx])
 
     def get_iter_for_learning_curve(self, times):
+        if times <= 0:
+            raise ValueError("invalid 'times' {}".format(times))
+        if not hasattr(self, "x_train"):
+            raise AttributeError("'ImageSet' object has no attribute 'x_train'. You should call split() before.")
         image_data_list = []
         for num in np.linspace(0, len(self.x_train), times+1, dtype=int):
             if num == 0:

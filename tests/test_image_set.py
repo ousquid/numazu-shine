@@ -27,17 +27,9 @@ class TestImageSet(unittest.TestCase):
             ImageSet(ng_xdata, ok_ydata, num_classes, grayscale)
             ImageSet(ok_xdata, ng_ydata, num_classes, grayscale)
         
-
+    
     def test_split(self):
-        x_data = np.zeros((10, 128, 256, 3))
-        y_data = np.zeros((10, 3))
-        for i in range(10):
-            x_data[i].fill(i)
-            y_data[i].fill(i)
-        
-        num_classes = 3
-        grayscale = True
-        s = ImageSet(x_data, y_data, num_classes, grayscale)
+        s = self.get_test_imageset()
         
         # train_rate に合ったデータ数を分割する
         s.split(train_rate=0.9)
@@ -78,3 +70,34 @@ class TestImageSet(unittest.TestCase):
         with self.assertRaises(ValueError):
             s.split(train_rate=0)
             s.split(train_rate=1.0001)
+        
+            
+    def get_test_imageset(self):
+        x_data = np.zeros((10, 128, 256, 3))
+        y_data = np.zeros((10, 3))
+        for i in range(10):
+            x_data[i].fill(i)
+            y_data[i].fill(i)
+        num_classes = 3
+        grayscale = True
+        return ImageSet(x_data, y_data, num_classes, grayscale)
+        
+        
+    def test_get_iter_for_learning_curve(self):
+        s = self.get_test_imageset()
+        s.split(train_rate=0.9)
+        for (i,image_data) in enumerate(s.get_iter_for_learning_curve(9)):
+            self.assertEqual(i+1, len(image_data[1]))
+            self.assertTrue(np.all(s.x_test == image_data[2]))
+            self.assertTrue(np.all(s.y_test == image_data[3]))
+        
+        with self.assertRaises(ValueError):
+            for i in s.get_iter_for_learning_curve(-2):
+                break
+        with self.assertRaises(ValueError):
+            for i in s.get_iter_for_learning_curve(-1):
+                break
+        with self.assertRaises(ValueError):
+            for i in s.get_iter_for_learning_curve(0):
+                break
+        
