@@ -20,7 +20,19 @@ def main():
     history = {}
     for image_data in image_set.get_iter_for_learning_curve(5):
         size = len(image_data[0])
-        history[size] = bot.learn(*image_data, epochs=30, batch_size=128)
+        
+        datagen = image.ImageDataGenerator(
+                    zca_whitening=True,
+                    rotation_range=10,
+                    width_shift_range=0.2,
+                    height_shift_range=0.2,
+                    shear_range=0.5,
+                    zoom_range=0.3,
+                    channel_shift_range=0.,
+                    horizontal_flip=True)
+        datagen.fit(image_data[0])
+
+        history[size] = bot.learn_by_generator(*image_data, datagen, batch_size=128, steps_per_epoch=size/128 )
 
     bot.draw_history_list('test.png', history, ["acc", "val_acc"], method=DrawMethod.best)
 

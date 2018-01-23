@@ -37,6 +37,25 @@ class LearningBot(object):
         self.model.reset_states()
         return history
         
+    def learn_by_generator(self, x_train, y_train, x_test, y_test, generator,
+                            batch_size, steps_per_epoch, epochs=30):
+        self.model.compile(loss='categorical_crossentropy',
+                            optimizer=RMSprop(),
+                            metrics=['accuracy'])
+
+        fp = "weights.hdf5"
+        model_check = ModelCheckpoint(fp, monitor='val_loss', save_best_only=True, period=1)
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
+
+        history = model.fit_generator(generator.flow(x_train, y_train, batch_size=batch_size),
+                                        steps_per_epoch=steps_per_epoch, 
+                                        epochs=epochs,
+                                        verbose=1,
+                                        validation_data=(x_test, y_test),
+                                        callbacks=[model_check, reduce_lr])
+        self.model.reset_states()
+        return history
+        
     def draw_history(self, filename, history, metrics):
         for metric in metrics:
             y = history.history[metric]
